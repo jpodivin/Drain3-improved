@@ -84,7 +84,7 @@ post: [Use open source Drain3 log-template mining project to monitor for network
 #### New features
 
 - [**Persistence**](#persistence). Save and load Drain state into an [Apache Kafka](https://kafka.apache.org)
-  topic, [Redis](https://redis.io/) or a file.
+  topic, [Redis](https://redis.io/), [Valkey](https://valkey.io/) or a file.
 - **Streaming**. Support feeding Drain with messages one-be-one.
 - [**Masking**](#masking). Replace some message parts (e.g numbers, IPs, emails) with wildcards. This improves the
   accuracy of template mining.
@@ -219,6 +219,8 @@ Drain3 currently supports the following persistence modes:
   to change Kafka endpoint (default is `localhost:9092`).
 
 - **Redis** - The snapshot is saved to a key in Redis database (contributed by @matabares).
+
+- **Valkey** - The snapshot is saved to a key in Valkey database.
 
 - **File** - The snapshot is saved to a file.
 
