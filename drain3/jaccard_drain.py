@@ -225,4 +225,3 @@ class JaccardDrain(DrainBase):
             return None
 
         return full_search()
-

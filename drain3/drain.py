@@ -416,7 +416,7 @@ class Drain(DrainBase):
         """
         Loop through two sequences and create a template sequence that
         replaces unmatched tokens with the parameter string.
-        
+
         :param seq1: first sequence
         :param seq2: second sequence
         :return: template sequence with param_str in place of unmatched tokens
