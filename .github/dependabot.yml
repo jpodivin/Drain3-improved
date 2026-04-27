@@ -1,0 +1,10 @@
+
+version: 2
+updates:
+  - package-ecosystem: "pip" # See documentation for possible values
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7 # Wait 7 days after release before considering update, protection against supply chain compromise
+
