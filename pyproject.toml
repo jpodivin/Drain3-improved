@@ -3,7 +3,10 @@ name = "drain3"
 version = "0.9.11"
 description = "Persistent & streaming log template miner"
 authors = ["IBM Research Haifa <david.ohana@ibm.com>"]
-maintainers = ["Jiri Podivin <jpodivin@redhat.com>"]
+maintainers = [
+  "Jiri Podivin <jpodivin@redhat.com>",
+  "Jan Matufka <jmatufka@redhat.com>"
+  ]
 readme = "README.md"
 license = "MIT"
 keywords=['drain', 'log', 'parser', 'IBM', 'template', 'logs', 'miner']
