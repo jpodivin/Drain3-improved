@@ -100,7 +100,7 @@ class DrainTest(unittest.TestCase):
 
     def test_max_clusters(self):
         """Verify model respects the max_clusters option.
-        
+
         Key difference between this and other tests is that with `max_clusters`
         set to 1 model is capable of keeping track of a single cluster at a
         time. Consequently, when log stream switched form the A format to the B

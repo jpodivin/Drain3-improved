@@ -87,7 +87,7 @@ post: [Use open source Drain3 log-template mining project to monitor for network
 - [**Masking**](#masking). Replace some message parts (e.g numbers, IPs, emails) with wildcards. This improves the
   accuracy of template mining.
 - [**Packaging**](#installation). As a pip package.
-- [**Configuration**](#configuration). Support for configuring Drain3 using an `.ini` file or a configuration object. 
+- [**Configuration**](#configuration). Support for configuring Drain3 using an `.ini` file or a configuration object.
 - [**Memory efficiency**](#memory-efficiency). Decrease the memory footprint of internal data structures and introduce
   cache to control max memory consumed (thanks to @StanislawSwierc)
 - [**Inference mode**](#training-vs-inference-modes). In case you want to separate training and inference phase, Drain3
@@ -279,7 +279,7 @@ For the input `"user johndoe logged in 11 minuts ago"`, the template would be:
 
 ```
 [
-  ExtractedParameter(value='johndoe', mask_name='*'), 
+  ExtractedParameter(value='johndoe', mask_name='*'),
   ExtractedParameter(value='11', mask_name='NUM')
 ]
 ```
@@ -354,7 +354,7 @@ Our project welcomes external contributions. Please refer to [CONTRIBUTING.md](C
 
 ##### v0.9.11
 
-* Fixed possible DivideByZero error when the profiler is enabled - [Issue #65](https://github.com/IBM/Drain3/issues/65). 
+* Fixed possible DivideByZero error when the profiler is enabled - [Issue #65](https://github.com/IBM/Drain3/issues/65).
 
 ##### v0.9.10
 
@@ -481,4 +481,3 @@ Our project welcomes external contributions. Please refer to [CONTRIBUTING.md](C
 ##### v0.7.5
 
 * Made Kafka and Redis optional requirements
- 
