@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "drain3"
+name = "drain3-improved"
 version = "0.9.11"
 description = "Persistent & streaming log template miner"
 authors = ["IBM Research Haifa <david.ohana@ibm.com>"]
