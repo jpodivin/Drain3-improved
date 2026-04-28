@@ -11,6 +11,7 @@ import jsonpickle  # type: ignore[import]
 from cachetools import LRUCache, cachedmethod
 
 from drain3.drain import Drain, DrainBase, LogCluster
+from drain3.jaccard_drain import JaccardDrain  # noqa
 from drain3.masking import LogMasker
 from drain3.persistence_handler import PersistenceHandler
 from drain3.simple_profiler import SimpleProfiler, NullProfiler, Profiler

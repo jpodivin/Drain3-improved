@@ -35,6 +35,9 @@ kafka = [
 redis = [
     "redis>=7.4.0"
 ]
+valkey = [
+    "valkey>=6.1.1"
+]
 
 [dependency-groups]
 dev = [
