@@ -19,16 +19,19 @@ from drain3.template_miner_config import TemplateMinerConfig
 
 logger = logging.getLogger(__name__)
 
-config_filename = 'drain3.ini'
+config_filename = "drain3.ini"
 
-ExtractedParameter = NamedTuple("ExtractedParameter", [("value", str), ("mask_name", str)])
+ExtractedParameter = NamedTuple(
+    "ExtractedParameter", [("value", str), ("mask_name", str)]
+)
 
 
 class TemplateMiner:
-
-    def __init__(self,
-                 persistence_handler: Optional[PersistenceHandler] = None,
-                 config: Optional[TemplateMinerConfig] = None):
+    def __init__(
+        self,
+        persistence_handler: Optional[PersistenceHandler] = None,
+        config: Optional[TemplateMinerConfig] = None,
+    ):
         """
         Wrapper for Drain with persistence and masking support
         :param persistence_handler: The type of persistence to use. When None, no persistence is applied.
@@ -56,7 +59,9 @@ class TemplateMiner:
         # target_obj will be "Drain" if the engine argument is not specified.
         target_obj = self.config.engine
         if target_obj not in ["Drain", "JaccardDrain"]:
-            raise ValueError(f"Invalid matched_pattern: {target_obj}, must be either 'Drain' or 'JaccardDrain'")
+            raise ValueError(
+                f"Invalid matched_pattern: {target_obj}, must be either 'Drain' or 'JaccardDrain'"
+            )
 
         self.drain: DrainBase = globals()[target_obj](
             sim_th=self.config.drain_sim_th,
@@ -66,12 +71,17 @@ class TemplateMiner:
             extra_delimiters=self.config.drain_extra_delimiters,
             profiler=self.profiler,
             param_str=param_str,
-            parametrize_numeric_tokens=self.config.parametrize_numeric_tokens
+            parametrize_numeric_tokens=self.config.parametrize_numeric_tokens,
         )
 
-        self.masker = LogMasker(self.config.masking_instructions, self.config.mask_prefix, self.config.mask_suffix)
-        self.parameter_extraction_cache: MutableMapping[Tuple[str, bool], str] = \
+        self.masker = LogMasker(
+            self.config.masking_instructions,
+            self.config.mask_prefix,
+            self.config.mask_suffix,
+        )
+        self.parameter_extraction_cache: MutableMapping[Tuple[str, bool], str] = (
             LRUCache(self.config.parameter_extraction_cache_capacity)
+        )
         self.last_save_time = time.time()
 
         if persistence_handler is not None:
@@ -95,10 +105,16 @@ class TemplateMiner:
         # json-pickle encoded keys as string by default, so we have to convert those back to int
         # this is only relevant for backwards compatibility when loading a snapshot of drain <= v0.9.1
         # which did not use json-pickle's keys=true
-        if len(loaded_drain.id_to_cluster) > 0 and isinstance(next(iter(loaded_drain.id_to_cluster.keys())), str):
-            loaded_drain.id_to_cluster = {int(k): v for k, v in list(loaded_drain.id_to_cluster.items())}
+        if len(loaded_drain.id_to_cluster) > 0 and isinstance(
+            next(iter(loaded_drain.id_to_cluster.keys())), str
+        ):
+            loaded_drain.id_to_cluster = {
+                int(k): v for k, v in list(loaded_drain.id_to_cluster.items())
+            }
             if self.config.drain_max_clusters:
-                cache: MutableMapping[int, Optional[LogCluster]] = LRUCache(maxsize=self.config.drain_max_clusters)
+                cache: MutableMapping[int, Optional[LogCluster]] = LRUCache(
+                    maxsize=self.config.drain_max_clusters
+                )
                 cache.update(loaded_drain.id_to_cluster)
                 loaded_drain.id_to_cluster = cache
 
@@ -106,19 +122,23 @@ class TemplateMiner:
         self.drain.clusters_counter = loaded_drain.clusters_counter
         self.drain.root_node = loaded_drain.root_node
 
-        logger.info(f"Restored {len(loaded_drain.clusters)} clusters "
-                    f"built from {loaded_drain.get_total_cluster_size()} messages")
+        logger.info(
+            f"Restored {len(loaded_drain.clusters)} clusters "
+            f"built from {loaded_drain.get_total_cluster_size()} messages"
+        )
 
     def save_state(self, snapshot_reason: str) -> None:
         assert self.persistence_handler is not None
 
-        state = jsonpickle.dumps(self.drain, keys=True).encode('utf-8')
+        state = jsonpickle.dumps(self.drain, keys=True).encode("utf-8")
         if self.config.snapshot_compress_state:
             state = base64.b64encode(zlib.compress(state))
 
-        logger.info(f"Saving state of {len(self.drain.clusters)} clusters "
-                    f"with {self.drain.get_total_cluster_size()} messages, {len(state)} bytes, "
-                    f"reason: {snapshot_reason}")
+        logger.info(
+            f"Saving state of {len(self.drain.clusters)} clusters "
+            f"with {self.drain.get_total_cluster_size()} messages, {len(state)} bytes, "
+            f"reason: {snapshot_reason}"
+        )
         self.persistence_handler.save_state(state)
 
     def get_snapshot_reason(self, change_type: str, cluster_id: int) -> Optional[str]:
@@ -146,7 +166,7 @@ class TemplateMiner:
             "cluster_id": cluster.cluster_id,
             "cluster_size": cluster.size,
             "template_mined": cluster.get_template(),
-            "cluster_count": len(self.drain.clusters)
+            "cluster_count": len(self.drain.clusters),
         }
 
         if self.persistence_handler is not None:
@@ -161,7 +181,9 @@ class TemplateMiner:
         self.profiler.report(self.config.profiling_report_sec)
         return result
 
-    def match(self, log_message: str, full_search_strategy: str = "never") -> Optional[LogCluster]:
+    def match(
+        self, log_message: str, full_search_strategy: str = "never"
+    ) -> Optional[LogCluster]:
         """
         Mask log message and match against an already existing cluster.
         Match shall be perfect (sim_th=1.0).
@@ -197,15 +219,16 @@ class TemplateMiner:
         :return: An ordered list of parameter values present in the log message.
         """
 
-        extracted_parameters = self.extract_parameters(log_template, log_message, exact_matching=False)
+        extracted_parameters = self.extract_parameters(
+            log_template, log_message, exact_matching=False
+        )
         if not extracted_parameters:
             return []
         return [parameter.value for parameter in extracted_parameters]
 
-    def extract_parameters(self,
-                           log_template: str,
-                           log_message: str,
-                           exact_matching: bool = True) -> Optional[Sequence[ExtractedParameter]]:
+    def extract_parameters(
+        self, log_template: str, log_message: str, exact_matching: bool = True
+    ) -> Optional[Sequence[ExtractedParameter]]:
         """
         Extract parameters from a log message according to a provided template that was generated
         by calling `add_log_message()`.
@@ -228,8 +251,9 @@ class TemplateMiner:
         for delimiter in self.config.drain_extra_delimiters:
             log_message = re.sub(delimiter, " ", log_message)
 
-        template_regex, param_group_name_to_mask_name = self._get_template_parameter_extraction_regex(
-            log_template, exact_matching)
+        template_regex, param_group_name_to_mask_name = (
+            self._get_template_parameter_extraction_regex(log_template, exact_matching)
+        )
 
         # Parameters are represented by specific named groups inside template_regex.
         parameter_match = re.match(template_regex, log_message)
@@ -249,9 +273,9 @@ class TemplateMiner:
         return extracted_parameters
 
     @cachedmethod(lambda self: self.parameter_extraction_cache)
-    def _get_template_parameter_extraction_regex(self,
-                                                 log_template: str,
-                                                 exact_matching: bool) -> Tuple[str, Mapping[str, str]]:
+    def _get_template_parameter_extraction_regex(
+        self, log_template: str, exact_matching: bool
+    ) -> Tuple[str, Mapping[str, str]]:
         param_group_name_to_mask_name = {}
         param_name_counter = [0]
 
@@ -269,7 +293,7 @@ class TemplateMiner:
                 for mi in masking_instructions:
                     # MaskingInstruction may already contain named groups.
                     # We replace group names in those named groups, to avoid conflicts due to duplicate names.
-                    if hasattr(mi, 'regex') and hasattr(mi, 'pattern'):
+                    if hasattr(mi, "regex") and hasattr(mi, "pattern"):
                         mi_groups = mi.regex.groupindex.keys()
                         pattern: str = mi.pattern
                     else:

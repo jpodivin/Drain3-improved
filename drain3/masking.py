@@ -6,7 +6,6 @@ from typing import cast, Collection, Dict, List
 
 
 class AbstractMaskingInstruction(abc.ABC):
-
     def __init__(self, mask_with: str):
         self.mask_with = mask_with
 
@@ -23,7 +22,6 @@ class AbstractMaskingInstruction(abc.ABC):
 
 
 class MaskingInstruction(AbstractMaskingInstruction):
-
     def __init__(self, pattern: str, mask_with: str):
         super().__init__(mask_with)
         self.regex = re.compile(pattern)
@@ -42,9 +40,12 @@ RegexMaskingInstruction = MaskingInstruction
 
 
 class LogMasker:
-
-    def __init__(self, masking_instructions: Collection[AbstractMaskingInstruction],
-                 mask_prefix: str, mask_suffix: str):
+    def __init__(
+        self,
+        masking_instructions: Collection[AbstractMaskingInstruction],
+        mask_prefix: str,
+        mask_suffix: str,
+    ):
         self.mask_prefix = mask_prefix
         self.mask_suffix = mask_suffix
         self.masking_instructions = masking_instructions
@@ -63,8 +64,14 @@ class LogMasker:
     def mask_names(self) -> Collection[str]:
         return self.mask_name_to_instructions.keys()
 
-    def instructions_by_mask_name(self, mask_name: str) -> Collection[AbstractMaskingInstruction]:
-        return cast(Collection[AbstractMaskingInstruction], self.mask_name_to_instructions.get(mask_name, []))
+    def instructions_by_mask_name(
+        self, mask_name: str
+    ) -> Collection[AbstractMaskingInstruction]:
+        return cast(
+            Collection[AbstractMaskingInstruction],
+            self.mask_name_to_instructions.get(mask_name, []),
+        )
+
 
 # Some masking examples
 # ---------------------

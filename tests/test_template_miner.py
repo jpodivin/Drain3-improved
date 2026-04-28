@@ -13,7 +13,7 @@ from drain3.template_miner_config import TemplateMinerConfig
 
 
 class TemplateMinerTest(unittest.TestCase):
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
 
     def test_load_config(self):
         config = TemplateMinerConfig()
@@ -42,11 +42,15 @@ class TemplateMinerTest(unittest.TestCase):
 
         template_miner2 = TemplateMiner(persistence, config)
 
-        self.assertListEqual(list(template_miner1.drain.id_to_cluster.keys()),
-                             list(template_miner2.drain.id_to_cluster.keys()))
+        self.assertListEqual(
+            list(template_miner1.drain.id_to_cluster.keys()),
+            list(template_miner2.drain.id_to_cluster.keys()),
+        )
 
-        self.assertListEqual(list(template_miner1.drain.root_node.key_to_child_node.keys()),
-                             list(template_miner2.drain.root_node.key_to_child_node.keys()))
+        self.assertListEqual(
+            list(template_miner1.drain.root_node.key_to_child_node.keys()),
+            list(template_miner2.drain.root_node.key_to_child_node.keys()),
+        )
 
         def get_tree_lines(template_miner):
             sio = io.StringIO()
@@ -54,15 +58,18 @@ class TemplateMinerTest(unittest.TestCase):
             sio.seek(0)
             return sio.readlines()
 
-        self.assertListEqual(get_tree_lines(template_miner1),
-                             get_tree_lines(template_miner2))
+        self.assertListEqual(
+            get_tree_lines(template_miner1), get_tree_lines(template_miner2)
+        )
 
         print(template_miner2.add_log_message("hello yyy"))
         print(template_miner2.add_log_message("goodbye ABC"))
 
     def test_extract_parameters(self):
         config = TemplateMinerConfig()
-        mi = MaskingInstruction("((?<=[^A-Za-z0-9])|^)([\\-\\+]?\\d+)((?=[^A-Za-z0-9])|$)", "NUM")
+        mi = MaskingInstruction(
+            "((?<=[^A-Za-z0-9])|^)([\\-\\+]?\\d+)((?=[^A-Za-z0-9])|$)", "NUM"
+        )
         config.masking_instructions.append(mi)
         mi = MaskingInstruction(r"multiple words", "WORDS")
         config.masking_instructions.append(mi)
@@ -75,7 +82,8 @@ class TemplateMinerTest(unittest.TestCase):
             res = template_miner.add_log_message(msg)
             print(f"result: {res}")
             extracted_parameters = template_miner.extract_parameters(
-                res["template_mined"], msg, exact_matching=exact_matching)
+                res["template_mined"], msg, exact_matching=exact_matching
+            )
             self.assertIsNotNone(extracted_parameters)
             params = [parameter.value for parameter in extracted_parameters]
             print(f"params: {params}")
@@ -126,188 +134,130 @@ class TemplateMinerTest(unittest.TestCase):
                 "<hdfs_uri>:<integer>+<integer>",
                 "hdfs://msra-sa-41:9000/pageinput2.txt:671088640+134217728",
                 ["hdfs://msra-sa-41:9000/pageinput2.txt", "671088640", "134217728"],
-                ["hdfs_uri", "integer", "integer"]
+                ["hdfs_uri", "integer", "integer"],
             ),
-            (
-                "Hello <quoted_string>",
-                "Hello 'World'",
-                ["'World'"],
-                ["quoted_string"]
-            ),
+            ("Hello <quoted_string>", "Hello 'World'", ["'World'"], ["quoted_string"]),
             (
                 "<quoted_string><quoted_string>",
                 """'This "should"'`do no breakin'`""",
                 ["""'This "should"'""", "`do no breakin'`"],
-                ["quoted_string", "quoted_string"]
+                ["quoted_string", "quoted_string"],
             ),
             (
                 "This is <markdown_emph> <markdown_emph>!.",
                 "This is ___very___ *important*!.",
                 ["___very___", "*important*"],
-                ["markdown_emph", "markdown_emph"]
+                ["markdown_emph", "markdown_emph"],
             ),
-            (
-                "<float>.<*>",
-                "0.15.Test",
-                ["0.15", "Test"],
-                ["float", "*"]
-            ),
+            ("<float>.<*>", "0.15.Test", ["0.15", "Test"], ["float", "*"]),
             (
                 "<ip>:<integer>",
                 "192.0.0.1:5000",
                 ["192.0.0.1", "5000"],
-                ["ip", "integer"]
+                ["ip", "integer"],
             ),
             (
                 "<ip>:<integer>:<integer>",
                 "192.0.0.1:5000:123",
                 ["192.0.0.1", "5000", "123"],
-                ["ip", "integer", "integer"]
+                ["ip", "integer", "integer"],
             ),
             (
                 "<float>.<*>.<float>",
                 "0.15.Test.0.2",
                 ["0.15", "Test", "0.2"],
-                ["float", "*", "float"]
+                ["float", "*", "float"],
             ),
-            (
-                "<float> <float>",
-                "0.15 10.16",
-                ["0.15", "10.16"],
-                ["float", "float"]
-            ),
+            ("<float> <float>", "0.15 10.16", ["0.15", "10.16"], ["float", "float"]),
             (
                 "<*words*>@<integer>",
                 "some other cool pattern@0xe1f",
                 ["some other cool pattern", "0xe1f"],
-                ["*words*", "integer"]
+                ["*words*", "integer"],
             ),
             (
                 "Another test with <*words*> that includes <integer><integer> and <integer> <*> <integer>",
                 "Another test with some other 0Xadded pattern that includes 500xc0ffee and 0X4 times 5",
                 ["some other 0Xadded pattern", "50", "0xc0ffee", "0X4", "times", "5"],
-                ["*words*", "integer", "integer", "integer", "*", "integer"]
+                ["*words*", "integer", "integer", "integer", "*", "integer"],
             ),
             (
                 "some <*words*> <*words*>",
                 "some multiple *word* pattern some confusing *word* pattern",
                 ["multiple *word* pattern", "some confusing *word* pattern"],
-                ["*words*", "*words*"]
+                ["*words*", "*words*"],
             ),
             (
                 "<*words*> <*>",
                 "multiple *word* pattern <*words*>",
                 ["multiple *word* pattern", "<*words*>"],
-                ["*words*", "*"]
+                ["*words*", "*"],
             ),
-            (
-                "<*> <*>",
-                "HelloWorld Test",
-                ["HelloWorld", "Test"],
-                ["*", "*"]
-            ),
+            ("<*> <*>", "HelloWorld Test", ["HelloWorld", "Test"], ["*", "*"]),
             (
                 "<*> <*>",
                 "HelloWorld <anything>",
                 ["HelloWorld", "<anything>"],
-                ["*", "*"]
+                ["*", "*"],
             ),
-            (
-                "<*><integer>",
-                "HelloWorld1",
-                ["HelloWorld", "1"],
-                ["*", "integer"]
-            ),
+            ("<*><integer>", "HelloWorld1", ["HelloWorld", "1"], ["*", "integer"]),
             (
                 "<*> works <*>",
                 "This works as-expected",
                 ["This", "as-expected"],
-                ["*", "*"]
+                ["*", "*"],
             ),
-            (
-                "<memory:<integer>>",
-                "<memory:8>",
-                ["8"],
-                ["integer"]
-            ),
+            ("<memory:<integer>>", "<memory:8>", ["8"], ["integer"]),
             (
                 "<memory:<integer> <core:<float>>>",
                 "<memory:8 <core:0.5>>",
                 ["8", "0.5"],
-                ["integer", "float"]
+                ["integer", "float"],
             ),
             (
                 "<*> <memory:<<integer> <core:<float>>>",
                 "New: <memory:<8 <core:0.5>>",
                 ["New:", "8", "0.5"],
-                ["*", "integer", "float"]
+                ["*", "integer", "float"],
             ),
-            (
-                "<<>",
-                "MaskPrefix",
-                ["MaskPrefix"],
-                ["<"]
-            ),
-            (
-                "<<<>>",
-                "<MaskPrefix>",
-                ["MaskPrefix"],
-                ["<"]
-            ),
-            (
-                "There are no parameters here.",
-                "There are no parameters here.",
-                [],
-                []
-            ),
-            (
-                "<float> <float>",
-                "0.15 10.16 3.19",
-                None,
-                None
-            ),
-            (
-                "<float> <float>",
-                "0.15 10.16 test 3.19",
-                None,
-                None
-            ),
-            (
-                "<memory:<<integer> <core:<float>>>",
-                "<memory:8 <core:0.5>>",
-                None,
-                None
-            ),
-            (
-                "<<>",
-                "<<>",
-                None,
-                None
-            ),
-            (
-                "<*words*> <*words*>",
-                "0.15 0.15",
-                None,
-                None
-            ),
+            ("<<>", "MaskPrefix", ["MaskPrefix"], ["<"]),
+            ("<<<>>", "<MaskPrefix>", ["MaskPrefix"], ["<"]),
+            ("There are no parameters here.", "There are no parameters here.", [], []),
+            ("<float> <float>", "0.15 10.16 3.19", None, None),
+            ("<float> <float>", "0.15 10.16 test 3.19", None, None),
+            ("<memory:<<integer> <core:<float>>>", "<memory:8 <core:0.5>>", None, None),
+            ("<<>", "<<>", None, None),
+            ("<*words*> <*words*>", "0.15 0.15", None, None),
         ]
 
         for template, content, expected_parameters, expected_mask_names in test_vectors:
-            with self.subTest(template=template, content=content, expected_parameters=expected_parameters):
-                extracted_parameters = template_miner.extract_parameters(template, content, exact_matching=True)
+            with self.subTest(
+                template=template,
+                content=content,
+                expected_parameters=expected_parameters,
+            ):
+                extracted_parameters = template_miner.extract_parameters(
+                    template, content, exact_matching=True
+                )
                 if expected_parameters is None:
                     self.assertIsNone(extracted_parameters)
                 else:
                     self.assertIsNotNone(extracted_parameters)
-                    self.assertListEqual([parameter.value for parameter in extracted_parameters],
-                                         expected_parameters)
-                    self.assertListEqual([parameter.mask_name for parameter in extracted_parameters],
-                                         expected_mask_names)
+                    self.assertListEqual(
+                        [parameter.value for parameter in extracted_parameters],
+                        expected_parameters,
+                    )
+                    self.assertListEqual(
+                        [parameter.mask_name for parameter in extracted_parameters],
+                        expected_mask_names,
+                    )
 
     def test_match_only(self):
         config = TemplateMinerConfig()
         config.drain_extra_delimiters = ["_"]
-        mi = MaskingInstruction("((?<=[^A-Za-z0-9])|^)([\\-\\+]?\\d+)((?=[^A-Za-z0-9])|$)", "NUM")
+        mi = MaskingInstruction(
+            "((?<=[^A-Za-z0-9])|^)([\\-\\+]?\\d+)((?=[^A-Za-z0-9])|$)", "NUM"
+        )
         config.masking_instructions.append(mi)
         tm = TemplateMiner(None, config)
 
@@ -354,13 +304,23 @@ class TemplateMinerTest(unittest.TestCase):
         print(miner.add_log_message("loadModel stop"))
         print(miner.add_log_message("this is a test"))
         miner.drain.print_tree()
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="fallback"))
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="always"))
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="fallback")
+        )
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="always")
+        )
         self.assertIsNone(miner.match("loadModel start", full_search_strategy="never"))
         print(miner.add_log_message("loadModel start"))
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="fallback"))
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="always"))
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="never"))
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="fallback")
+        )
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="always")
+        )
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="never")
+        )
 
         config = TemplateMinerConfig()
         config.parametrize_numeric_tokens = False
@@ -369,9 +329,15 @@ class TemplateMinerTest(unittest.TestCase):
         print(miner.add_log_message("loadModel start"))
         print(miner.add_log_message("loadModel stop"))
         print(miner.add_log_message("this is a test"))
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="fallback"))
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="always"))
-        self.assertIsNotNone(miner.match("loadModel start", full_search_strategy="never"))
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="fallback")
+        )
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="always")
+        )
+        self.assertIsNotNone(
+            miner.match("loadModel start", full_search_strategy="never")
+        )
 
         self.assertIsNone(miner.match("", full_search_strategy="never"))
         self.assertIsNone(miner.match("", full_search_strategy="always"))

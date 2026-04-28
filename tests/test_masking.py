@@ -6,7 +6,6 @@ from drain3.masking import MaskingInstruction, LogMasker
 
 
 class MaskingTest(unittest.TestCase):
-
     def test_instructions_by_mask_name(self):
         instructions = []
         a = MaskingInstruction(r"a", "1")
@@ -26,11 +25,15 @@ class MaskingTest(unittest.TestCase):
         self.assertCountEqual([a, b], masker.instructions_by_mask_name("1"))
         self.assertCountEqual([c], masker.instructions_by_mask_name("2"))
         self.assertCountEqual([d], masker.instructions_by_mask_name("3"))
-        self.assertCountEqual([x, y], masker.instructions_by_mask_name("something else"))
+        self.assertCountEqual(
+            [x, y], masker.instructions_by_mask_name("something else")
+        )
 
     def test_mask(self):
         s = "D9 test 999 888 1A ccc 3"
-        mi = MaskingInstruction(r"((?<=[^A-Za-z0-9])|^)([\-\+]?\d+)((?=[^A-Za-z0-9])|$)", "NUM")
+        mi = MaskingInstruction(
+            r"((?<=[^A-Za-z0-9])|^)([\-\+]?\d+)((?=[^A-Za-z0-9])|$)", "NUM"
+        )
         masker = LogMasker([mi], "<!", "!>")
         masked = masker.mask(s)
         self.assertEqual("D9 test <!NUM!> <!NUM!> 1A ccc <!NUM!>", masked)

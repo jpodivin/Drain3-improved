@@ -14,11 +14,13 @@ class JaccardDrain(DrainBase):
     Drain that uses Jaccard similarity to match log messages.
     """
 
-    def tree_search(self,
-                    root_node: Node,
-                    tokens: Sequence[str],
-                    sim_th: float,
-                    include_params: bool) -> Optional[LogCluster]:
+    def tree_search(
+        self,
+        root_node: Node,
+        tokens: Sequence[str],
+        sim_th: float,
+        include_params: bool,
+    ) -> Optional[LogCluster]:
         # at first level, children are grouped by token (The first word in tokens)
         token_count = len(tokens)
         # cur_node = root_node.key_to_child_node.get(str(token_count))
@@ -147,7 +149,9 @@ class JaccardDrain(DrainBase):
             current_depth += 1
 
     # seq1 is a template, seq2 is the log to match
-    def get_seq_distance(self, seq1: Sequence[str], seq2: Sequence[str], include_params: bool) -> Tuple[float, int]:
+    def get_seq_distance(
+        self, seq1: Sequence[str], seq2: Sequence[str], include_params: bool
+    ) -> Tuple[float, int]:
         # Jaccard index, It is used to measure the similarity of two sets.
         # The closer its value is to 1, the more common members the two sets have, and the higher the similarity.
 
@@ -180,7 +184,9 @@ class JaccardDrain(DrainBase):
         return ret_val, param_count
 
     # seq1:tonkens->list seq2:template->tuple
-    def create_template(self, seq1: Sequence[str], seq2: Sequence[str]) -> Sequence[str]:
+    def create_template(
+        self, seq1: Sequence[str], seq2: Sequence[str]
+    ) -> Sequence[str]:
 
         inter_set = set(seq1) & set(seq2)
 
@@ -201,7 +207,9 @@ class JaccardDrain(DrainBase):
 
         return ret_val
 
-    def match(self, content: str, full_search_strategy: str = "never") -> Optional[LogCluster]:
+    def match(
+        self, content: str, full_search_strategy: str = "never"
+    ) -> Optional[LogCluster]:
 
         assert full_search_strategy in ["always", "never", "fallback"]
 
@@ -211,13 +219,17 @@ class JaccardDrain(DrainBase):
 
         def full_search() -> Optional[LogCluster]:
             all_ids = self.get_clusters_ids_for_seq_len(content_tokens[0])
-            cluster = self.fast_match(all_ids, content_tokens, required_sim_th, include_params=True)
+            cluster = self.fast_match(
+                all_ids, content_tokens, required_sim_th, include_params=True
+            )
             return cluster
 
         if full_search_strategy == "always":
             return full_search()
 
-        match_cluster = self.tree_search(self.root_node, content_tokens, required_sim_th, include_params=True)
+        match_cluster = self.tree_search(
+            self.root_node, content_tokens, required_sim_th, include_params=True
+        )
         if match_cluster is not None:
             return match_cluster
 

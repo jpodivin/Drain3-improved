@@ -6,7 +6,6 @@ from drain3.drain import Drain, LogCluster
 
 
 class DrainTest(unittest.TestCase):
-
     def test_add_shorter_than_depth_message(self):
         model = Drain(depth=4)
         res = model.add_log_message("hello")

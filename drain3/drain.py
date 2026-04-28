@@ -3,8 +3,20 @@
 # Based on https://github.com/logpai/logparser/blob/master/logparser/Drain/Drain.py by LogPAI team
 
 from abc import ABC, abstractmethod
-from typing import cast, Collection, IO, Iterable, MutableMapping, MutableSequence, Optional, Sequence, Tuple, \
-    TYPE_CHECKING, TypeVar, Union
+from typing import (
+    cast,
+    Collection,
+    IO,
+    Iterable,
+    MutableMapping,
+    MutableSequence,
+    Optional,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+)
 
 from cachetools import LRUCache, Cache
 
@@ -20,7 +32,7 @@ class LogCluster:
         self.size = 1
 
     def get_template(self) -> str:
-        return ' '.join(self.log_template_tokens)
+        return " ".join(self.log_template_tokens)
 
     def __str__(self) -> str:
         return f"ID={str(self.cluster_id).ljust(5)} : size={str(self.size).ljust(10)}: {self.get_template()}"
@@ -28,11 +40,13 @@ class LogCluster:
 
 _T = TypeVar("_T")
 if TYPE_CHECKING:
+
     class _LRUCache(LRUCache[int, Optional[LogCluster]]):
         #  see https://github.com/python/mypy/issues/4148 for this hack
         ...
 else:
     _LRUCache = LRUCache
+
 
 class LogClusterCache(_LRUCache):
     """
@@ -43,7 +57,9 @@ class LogClusterCache(_LRUCache):
     def __missing__(self, key: int) -> None:
         return None
 
-    def get(self, key: int, _: Union[Optional[LogCluster], _T] = None) -> Optional[LogCluster]:
+    def get(
+        self, key: int, _: Union[Optional[LogCluster], _T] = None
+    ) -> Optional[LogCluster]:
         """
         Returns the value of the item with the specified key without updating
         the cache eviction algorithm.
@@ -60,15 +76,17 @@ class Node:
 
 
 class DrainBase(ABC):
-    def __init__(self,
-                 depth: int = 4,
-                 sim_th: float = 0.4,
-                 max_children: int = 100,
-                 max_clusters: Optional[int] = None,
-                 extra_delimiters: Sequence[str] = (),
-                 profiler: Profiler = NullProfiler(),
-                 param_str: str = "<*>",
-                 parametrize_numeric_tokens: bool = True) -> None:
+    def __init__(
+        self,
+        depth: int = 4,
+        sim_th: float = 0.4,
+        max_children: int = 100,
+        max_clusters: Optional[int] = None,
+        extra_delimiters: Sequence[str] = (),
+        profiler: Profiler = NullProfiler(),
+        param_str: str = "<*>",
+        parametrize_numeric_tokens: bool = True,
+    ) -> None:
         """
         Create a new Drain instance.
 
@@ -91,7 +109,9 @@ class DrainBase(ABC):
             raise ValueError("depth argument must be at least 3")
 
         self.log_cluster_depth = depth
-        self.max_node_depth = depth - 2  # max depth of a prefix tree node, starting from zero
+        self.max_node_depth = (
+            depth - 2
+        )  # max depth of a prefix tree node, starting from zero
         self.sim_th = sim_th
         self.max_children = max_children
         self.root_node = Node()
@@ -101,8 +121,9 @@ class DrainBase(ABC):
         self.param_str = param_str
         self.parametrize_numeric_tokens = parametrize_numeric_tokens
 
-        self.id_to_cluster: MutableMapping[int, Optional[LogCluster]] = \
+        self.id_to_cluster: MutableMapping[int, Optional[LogCluster]] = (
             {} if max_clusters is None else LogClusterCache(maxsize=max_clusters)
+        )
         self.clusters_counter = 0
 
     @property
@@ -113,11 +134,13 @@ class DrainBase(ABC):
     def has_numbers(s: Iterable[str]) -> bool:
         return any(char.isdigit() for char in s)
 
-    def fast_match(self,
-                   cluster_ids: Collection[int],
-                   tokens: Sequence[str],
-                   sim_th: float,
-                   include_params: bool) -> Optional[LogCluster]:
+    def fast_match(
+        self,
+        cluster_ids: Collection[int],
+        tokens: Sequence[str],
+        sim_th: float,
+        include_params: bool,
+    ) -> Optional[LogCluster]:
         """
         Find the best match for a log message (represented as tokens) versus a list of clusters
         :param cluster_ids: List of clusters to match against (represented by their IDs)
@@ -138,8 +161,12 @@ class DrainBase(ABC):
             cluster = self.id_to_cluster.get(cluster_id)
             if cluster is None:
                 continue
-            cur_sim, param_count = self.get_seq_distance(cluster.log_template_tokens, tokens, include_params)
-            if cur_sim > max_sim or (cur_sim == max_sim and param_count > max_param_count):
+            cur_sim, param_count = self.get_seq_distance(
+                cluster.log_template_tokens, tokens, include_params
+            )
+            if cur_sim > max_sim or (
+                cur_sim == max_sim and param_count > max_param_count
+            ):
                 max_sim = cur_sim
                 max_param_count = param_count
                 max_cluster = cluster
@@ -152,16 +179,23 @@ class DrainBase(ABC):
     def print_tree(self, file: Optional[IO[str]] = None, max_clusters: int = 5) -> None:
         self.print_node("root", self.root_node, 0, file, max_clusters)
 
-    def print_node(self, token: str, node: Node, depth: int, file: Optional[IO[str]], max_clusters: int) -> None:
-        out_str = '\t' * depth
+    def print_node(
+        self,
+        token: str,
+        node: Node,
+        depth: int,
+        file: Optional[IO[str]],
+        max_clusters: int,
+    ) -> None:
+        out_str = "\t" * depth
 
         if depth == 0:
-            out_str += f'<{token}>'
+            out_str += f"<{token}>"
         elif depth == 1:
             if token.isdigit():
-                out_str += f'<L={token}>'
+                out_str += f"<L={token}>"
             else:
-                out_str += f'<{token}>'
+                out_str += f"<{token}>"
         else:
             out_str += f'"{token}"'
 
@@ -175,7 +209,7 @@ class DrainBase(ABC):
 
         for cid in node.cluster_ids[:max_clusters]:
             cluster = self.id_to_cluster[cid]
-            out_str = '\t' * (depth + 1) + str(cluster)
+            out_str = "\t" * (depth + 1) + str(cluster)
             print(out_str, file=file)
 
     def get_content_as_tokens(self, content: str) -> Sequence[str]:
@@ -190,7 +224,9 @@ class DrainBase(ABC):
 
         if self.profiler:
             self.profiler.start_section("tree_search")
-        match_cluster = self.tree_search(self.root_node, content_tokens, self.sim_th, False)
+        match_cluster = self.tree_search(
+            self.root_node, content_tokens, self.sim_th, False
+        )
         if self.profiler:
             self.profiler.end_section()
 
@@ -209,7 +245,9 @@ class DrainBase(ABC):
         else:
             if self.profiler:
                 self.profiler.start_section("cluster_exist")
-            new_template_tokens = self.create_template(content_tokens, match_cluster.log_template_tokens)
+            new_template_tokens = self.create_template(
+                content_tokens, match_cluster.log_template_tokens
+            )
             if tuple(new_template_tokens) == match_cluster.log_template_tokens:
                 update_type = "none"
             else:
@@ -237,7 +275,9 @@ class DrainBase(ABC):
         Return all clusters with the specified count of tokens
         """
 
-        def append_clusters_recursive(node: Node, id_list_to_fill: MutableSequence[int]) -> None:
+        def append_clusters_recursive(
+            node: Node, id_list_to_fill: MutableSequence[int]
+        ) -> None:
             id_list_to_fill.extend(node.cluster_ids)
             for child_node in node.key_to_child_node.values():
                 append_clusters_recursive(child_node, id_list_to_fill)
@@ -253,37 +293,41 @@ class DrainBase(ABC):
         return target
 
     @abstractmethod
-    def tree_search(self,
-                    root_node: Node,
-                    tokens: Sequence[str],
-                    sim_th: float,
-                    include_params: bool) -> Optional[LogCluster]:
-        ...
+    def tree_search(
+        self,
+        root_node: Node,
+        tokens: Sequence[str],
+        sim_th: float,
+        include_params: bool,
+    ) -> Optional[LogCluster]: ...
 
     @abstractmethod
-    def add_seq_to_prefix_tree(self, root_node: Node, cluster: LogCluster) -> None:
-        ...
+    def add_seq_to_prefix_tree(self, root_node: Node, cluster: LogCluster) -> None: ...
 
     @abstractmethod
-    def get_seq_distance(self, seq1: Sequence[str], seq2: Sequence[str], include_params: bool) -> Tuple[float, int]:
-        ...
+    def get_seq_distance(
+        self, seq1: Sequence[str], seq2: Sequence[str], include_params: bool
+    ) -> Tuple[float, int]: ...
 
     @abstractmethod
-    def create_template(self, seq1: Sequence[str], seq2: Sequence[str]) -> Sequence[str]:
-        ...
+    def create_template(
+        self, seq1: Sequence[str], seq2: Sequence[str]
+    ) -> Sequence[str]: ...
 
     @abstractmethod
-    def match(self, content: str, full_search_strategy: str = "never") -> Optional[LogCluster]:
-        ...
+    def match(
+        self, content: str, full_search_strategy: str = "never"
+    ) -> Optional[LogCluster]: ...
 
 
 class Drain(DrainBase):
-
-    def tree_search(self,
-                    root_node: Node,
-                    tokens: Sequence[str],
-                    sim_th: float,
-                    include_params: bool) -> Optional[LogCluster]:
+    def tree_search(
+        self,
+        root_node: Node,
+        tokens: Sequence[str],
+        sim_th: float,
+        include_params: bool,
+    ) -> Optional[LogCluster]:
 
         # at first level, children are grouped by token (word) count
         token_count = len(tokens)
@@ -339,7 +383,6 @@ class Drain(DrainBase):
 
         current_depth = 1
         for token in cluster.log_template_tokens:
-
             # if at max depth or this is last token in template - add current log cluster to the leaf node
             if current_depth >= self.max_node_depth or current_depth >= token_count:
                 # clean up stale clusters before adding a new one.
@@ -388,7 +431,9 @@ class Drain(DrainBase):
             current_depth += 1
 
     # seq1 is a template, seq2 is the log to match
-    def get_seq_distance(self, seq1: Sequence[str], seq2: Sequence[str], include_params: bool) -> Tuple[float, int]:
+    def get_seq_distance(
+        self, seq1: Sequence[str], seq2: Sequence[str], include_params: bool
+    ) -> Tuple[float, int]:
         assert len(seq1) == len(seq2)
 
         # sequences are empty - full match
@@ -412,7 +457,9 @@ class Drain(DrainBase):
 
         return ret_val, param_count
 
-    def create_template(self, seq1: Sequence[str], seq2: Sequence[str]) -> Sequence[str]:
+    def create_template(
+        self, seq1: Sequence[str], seq2: Sequence[str]
+    ) -> Sequence[str]:
         """
         Loop through two sequences and create a template sequence that
         replaces unmatched tokens with the parameter string.
@@ -422,9 +469,14 @@ class Drain(DrainBase):
         :return: template sequence with param_str in place of unmatched tokens
         """
         assert len(seq1) == len(seq2)
-        return [token2 if token1 == token2 else self.param_str for token1, token2 in zip(seq1, seq2)]
+        return [
+            token2 if token1 == token2 else self.param_str
+            for token1, token2 in zip(seq1, seq2)
+        ]
 
-    def match(self, content: str, full_search_strategy: str = "never") -> Optional[LogCluster]:
+    def match(
+        self, content: str, full_search_strategy: str = "never"
+    ) -> Optional[LogCluster]:
         """
         Match log message against an already existing cluster.
         Match shall be perfect (sim_th=1.0).
@@ -456,13 +508,17 @@ class Drain(DrainBase):
         # quitting on less than exact cluster matches.
         def full_search() -> Optional[LogCluster]:
             all_ids = self.get_clusters_ids_for_seq_len(len(content_tokens))
-            cluster = self.fast_match(all_ids, content_tokens, required_sim_th, include_params=True)
+            cluster = self.fast_match(
+                all_ids, content_tokens, required_sim_th, include_params=True
+            )
             return cluster
 
         if full_search_strategy == "always":
             return full_search()
 
-        match_cluster = self.tree_search(self.root_node, content_tokens, required_sim_th, include_params=True)
+        match_cluster = self.tree_search(
+            self.root_node, content_tokens, required_sim_th, include_params=True
+        )
         if match_cluster is not None:
             return match_cluster
 

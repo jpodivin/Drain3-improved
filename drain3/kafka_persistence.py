@@ -8,8 +8,12 @@ from drain3.persistence_handler import PersistenceHandler
 
 
 class KafkaPersistence(PersistenceHandler):
-
-    def __init__(self, topic: str, snapshot_poll_timeout_sec: int = 60, **kafka_client_options: Any) -> None:
+    def __init__(
+        self,
+        topic: str,
+        snapshot_poll_timeout_sec: int = 60,
+        **kafka_client_options: Any,
+    ) -> None:
         self.topic = topic
         self.kafka_client_options = kafka_client_options
         self.producer = kafka.KafkaProducer(**self.kafka_client_options)
@@ -29,7 +33,9 @@ class KafkaPersistence(PersistenceHandler):
             snapshot_poll_timeout_ms = self.snapshot_poll_timeout_sec * 1000
             records = consumer.poll(snapshot_poll_timeout_ms)
             if not records:
-                raise RuntimeError(f"No message received from Kafka during restore even though end_offset>0")
+                raise RuntimeError(
+                    "No message received from Kafka during restore even though end_offset>0"
+                )
             last_msg = records[partition][0]
             state = cast(bytes, last_msg.value)
         else:

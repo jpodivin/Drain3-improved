@@ -14,7 +14,7 @@ from drain3.template_miner_config import TemplateMinerConfig
 persistence_type = "FILE"
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
 
 if persistence_type == "KAFKA":
     from drain3.kafka_persistence import KafkaPersistence
@@ -29,12 +29,14 @@ elif persistence_type == "FILE":
 elif persistence_type == "REDIS":
     from drain3.redis_persistence import RedisPersistence
 
-    persistence = RedisPersistence(redis_host='',
-                                   redis_port=25061,
-                                   redis_db=0,
-                                   redis_pass='',
-                                   is_ssl=True,
-                                   redis_key="drain3_state_key")
+    persistence = RedisPersistence(
+        redis_host="",
+        redis_port=25061,
+        redis_db=0,
+        redis_pass="",
+        is_ssl=True,
+        redis_key="drain3_state_key",
+    )
 else:
     persistence = None
 
@@ -45,10 +47,10 @@ config.profiling_enabled = False
 template_miner = TemplateMiner(persistence, config)
 print(f"Drain3 started with '{persistence_type}' persistence")
 print(f"{len(config.masking_instructions)} masking instructions are in use")
-print(f"Starting training mode. Reading from std-in ('q' to finish)")
+print("Starting training mode. Reading from std-in ('q' to finish)")
 while True:
     log_line = input("> ")
-    if log_line == 'q':
+    if log_line == "q":
         break
     result = template_miner.add_log_message(log_line)
     result_json = json.dumps(result)
@@ -61,14 +63,16 @@ print("Training done. Mined clusters:")
 for cluster in template_miner.drain.clusters:
     print(cluster)
 
-print(f"Starting inference mode, matching to pre-trained clusters. Input log lines or 'q' to finish")
+print(
+    "Starting inference mode, matching to pre-trained clusters. Input log lines or 'q' to finish"
+)
 while True:
     log_line = input("> ")
-    if log_line == 'q':
+    if log_line == "q":
         break
     cluster = template_miner.match(log_line)
     if cluster is None:
-        print(f"No match found")
+        print("No match found")
     else:
         template = cluster.get_template()
         print(f"Matched template #{cluster.cluster_id}: {template}")
