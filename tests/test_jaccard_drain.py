@@ -7,7 +7,6 @@ from drain3.jaccard_drain import JaccardDrain
 
 
 class DrainTest(unittest.TestCase):
-
     def test_add_shorter_than_depth_message(self):
         model = JaccardDrain(depth=4)
         res = model.add_log_message("hello")

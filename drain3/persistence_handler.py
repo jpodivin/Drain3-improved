@@ -5,7 +5,6 @@ from typing import Optional
 
 
 class PersistenceHandler(ABC):
-
     @abstractmethod
     def save_state(self, state: bytes) -> None:
         pass
