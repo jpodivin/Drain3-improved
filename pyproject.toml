@@ -1,6 +1,6 @@
 [project]
 name = "drain3-improved"
-version = "0.9.11"
+version = "0.10.0"
 description = "Persistent & streaming log template miner"
 requires-python = ">=3.10"
 authors = [
