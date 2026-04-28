@@ -2,7 +2,9 @@
 
 ## Important Update
 
-Drain3 was moved to the `logpai` GitHub organization (which is also the home for the original Drain implementation). We always welcome more contributors and maintainers to join us and push the project forward. We welcome more contributions and variants of implementations if you find practical enhancements to the algorithm in production scenarios.
+This repository has been forked from https://github.com/logpai/Drain3 as it has not received a new release in years.
+For all intents and purposes, it is the same template miner, just with some fixes, updated dependencies,
+and PyPi release compatible with more recent Python versions.
 
 ## Introduction
 
@@ -286,10 +288,10 @@ For the input `"user johndoe logged in 11 minuts ago"`, the template would be:
 
 ## Installation
 
-Drain3 is available from [PyPI](https://pypi.org/project/drain3). To install use `pip`:
+Drain3 is available from [PyPI](https://pypi.org/project/drain3-improved). To install use `pip`:
 
 ```
-pip3 install drain3
+pip3 install drain3-improved
 ```
 
 Note: If you decide to use Kafka or Redis persistence, you should install relevant client library explicitly, since it
