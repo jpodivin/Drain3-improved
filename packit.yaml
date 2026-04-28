@@ -1,0 +1,57 @@
+---
+packit_instances: ["prod", "stg"]
+downstream_package_name: python-drain3-improved
+upstream_package_name: drain3-improved
+specfile_path: python-drain3-improved.spec
+upstream_tag_template: 'v{version}'
+upstream_project_url: https://github.com/jpodivin/Drain3-improved
+srpm_build_deps:
+  - poetry
+actions:
+  # TODO: Create the project in Fedora, until then the workflow will fail
+  # afterwards we can copy specfile from a different source.
+  # post-upstream-clone:
+  #   # rawhide specfile will be the source of truth: we don't need to have the specfile upstream
+  #   - curl -Lvso python-drain3-improved.spec https://src.fedoraproject.org/rpms/python-drain3-improved/raw/main/f/python-drain3-improved.spec
+  create-archive:
+    - poetry build -f sdist
+    - bash -c "ls -1t ./dist/*.tar.gz | head -n 1"
+  get-current-version:
+    - poetry version -s
+jobs:
+  - job: pull_from_upstream
+    trigger: release
+    dist_git_branches:
+      - rawhide
+  - job: copr_build
+    trigger: pull_request
+    targets:
+      - fedora-rawhide
+      - fedora-44
+  # Run build on commit with OpenScanHub checks
+  - job: copr_build
+    trigger: commit
+    branch: main
+    targets:
+      - fedora-rawhide
+      - fedora-44
+    osh_diff_scan_after_copr_build: true
+  - job: tests
+    trigger: pull_request
+    targets:
+      - fedora-rawhide
+      - fedora-44
+  # downstream automation:
+  - job: koji_build
+    packit_instances: ["prod"]
+    trigger: commit
+    allowed_committers: ['packit', 'msuchy']
+    dist_git_branches:
+      - fedora-rawhide
+      - fedora-44
+  - job: bodhi_update
+    packit_instances: ["prod"]
+    trigger: commit
+    dist_git_branches:
+      - fedora-rawhide
+      - fedora-44
