@@ -11,7 +11,7 @@ import jsonpickle  # type: ignore[import]
 from cachetools import LRUCache, cachedmethod
 
 from drain3.drain import Drain, DrainBase, LogCluster
-from drain3.jaccard_drain import JaccardDrain  # noqa
+from drain3.jaccard_drain import JaccardDrain
 from drain3.masking import LogMasker
 from drain3.persistence_handler import PersistenceHandler
 from drain3.simple_profiler import SimpleProfiler, NullProfiler, Profiler
@@ -28,6 +28,8 @@ ExtractedParameter = NamedTuple(
 
 
 class TemplateMiner:
+    drain: DrainBase
+
     def __init__(
         self,
         persistence_handler: Optional[PersistenceHandler] = None,
@@ -64,16 +66,28 @@ class TemplateMiner:
                 f"Invalid matched_pattern: {target_obj}, must be either 'Drain' or 'JaccardDrain'"
             )
 
-        self.drain: DrainBase = globals()[target_obj](
-            sim_th=self.config.drain_sim_th,
-            depth=self.config.drain_depth,
-            max_children=self.config.drain_max_children,
-            max_clusters=self.config.drain_max_clusters,
-            extra_delimiters=self.config.drain_extra_delimiters,
-            profiler=self.profiler,
-            param_str=param_str,
-            parametrize_numeric_tokens=self.config.parametrize_numeric_tokens,
-        )
+        if target_obj == "Jaccarddrain":
+            self.drain = JaccardDrain(
+                sim_th=self.config.drain_sim_th,
+                depth=self.config.drain_depth,
+                max_children=self.config.drain_max_children,
+                max_clusters=self.config.drain_max_clusters,
+                extra_delimiters=self.config.drain_extra_delimiters,
+                profiler=self.profiler,
+                param_str=param_str,
+                parametrize_numeric_tokens=self.config.parametrize_numeric_tokens,
+            )
+        else:
+            self.drain = Drain(
+                sim_th=self.config.drain_sim_th,
+                depth=self.config.drain_depth,
+                max_children=self.config.drain_max_children,
+                max_clusters=self.config.drain_max_clusters,
+                extra_delimiters=self.config.drain_extra_delimiters,
+                profiler=self.profiler,
+                param_str=param_str,
+                parametrize_numeric_tokens=self.config.parametrize_numeric_tokens,
+            )
 
         self.masker = LogMasker(
             self.config.masking_instructions,
