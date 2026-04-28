@@ -33,7 +33,7 @@ kafka = [
     "kafka-python>=2.3.0"
 ]
 redis = [
-    "redis>=4.6.0"
+    "redis>=7.4.0"
 ]
 
 [dependency-groups]
