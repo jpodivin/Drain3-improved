@@ -1,16 +1,18 @@
-[tool.poetry]
+[project]
 name = "drain3-improved"
 version = "0.9.11"
 description = "Persistent & streaming log template miner"
-authors = ["IBM Research Haifa <david.ohana@ibm.com>"]
+requires-python = ">=3.9"
+authors = [
+    { name = "IBM Research Haifa", email = "david.ohana@ibm.com" }
+]
 maintainers = [
-  "Jiri Podivin <jpodivin@redhat.com>",
-  "Jan Matufka <jmatufka@redhat.com>"
-  ]
+  { name = "Jiri Podivin", email = "jpodivin@redhat.com" },
+  { name = "Jan Matufka", email = "jmatufka@redhat.com" }
+]
 readme = "README.md"
 license = "MIT"
 keywords=['drain', 'log', 'parser', 'IBM', 'template', 'logs', 'miner']
-
 classifiers=[
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -22,41 +24,31 @@ classifiers=[
     'Topic :: System :: Monitoring',
     "Topic :: Software Development :: Libraries",
 ]
-
-packages = [
-    { include = "drain3" },
+dependencies = [
+    "jsonpickle>=3.0.0",
+    "cachetools>=6.2.0",
 ]
 
-exclude = ['tests', 'examples']
-
-[tool.poetry.build]
-generate-setup-file = true
-
-
-[tool.poetry.dependencies]
-python = "^3.9"
-jsonpickle = ">=3.0.0"
-cachetools = ">=6.2.0"
-redis = { version = ">=4.6.0", optional = true }
-kafka-python = { version = ">=2.3.0", optional = true }
-
-[tool.poetry.extras]
-all=[
-    'redis',
-    'kafka-python',
+[project.optional-dependencies]
+kafka = [
+    "kafka-python>=2.3.0"
 ]
-kafka= [
-    'kafka-python',
-]
-redis=[
-    'redis',
+redis = [
+    "redis>=4.6.0"
 ]
 
-[tool.poetry.group.dev.dependencies]
-mypy = ">=1.19.0"
-types-cachetools = ">=6.2.0.0"
-types-redis = ">=4.6.0.0"
+[dependency-groups]
+dev = [
+    "mypy>=1.19.0",
+    "types-cachetools>=6.2.0.0",
+    "types-redis>=4.6.0.0"
+]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [
+    { include = "drain3" }
+]

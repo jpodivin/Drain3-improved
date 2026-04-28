@@ -7,7 +7,7 @@ description = "Timeout context manager for asyncio programs"
 optional = true
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "(extra == \"all\" or extra == \"redis\") and python_full_version <= \"3.11.2\""
+markers = "extra == \"redis\" and python_full_version <= \"3.11.2\""
 files = [
     {file = "async-timeout-4.0.2.tar.gz", hash = "sha256:2163e1640ddb52b7a8c80d0a67a08587e5d245cc9c553a74a847056bc2976b15"},
     {file = "async_timeout-4.0.2-py3-none-any.whl", hash = "sha256:8ca1e4fcf50d07413d66d1a5e416e42cfdf5851c981d679a09851a6853383b3c"},
@@ -172,7 +172,7 @@ description = "Pure Python client for Apache Kafka"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"kafka\""
+markers = "extra == \"kafka\""
 files = [
     {file = "kafka_python-2.3.1-py2.py3-none-any.whl", hash = "sha256:4908865da9e57f0f966a83788c71cb0ae91c33451a26ab6e6984a00b15c6ed71"},
     {file = "kafka_python-2.3.1.tar.gz", hash = "sha256:90f1caa12d8faa9fd059852b0c73adf169b979279aa2e3ff370f9fe615d654b6"},
@@ -467,7 +467,7 @@ description = "Python client for Redis database and key-value store"
 optional = true
 python-versions = ">=3.7"
 groups = ["main"]
-markers = "extra == \"all\" or extra == \"redis\""
+markers = "extra == \"redis\""
 files = [
     {file = "redis-4.6.0-py3-none-any.whl", hash = "sha256:e2b03db868160ee4591de3cb90d40ebb50a90dd302138775937f6a42b7ed183c"},
     {file = "redis-4.6.0.tar.gz", hash = "sha256:585dc516b9eb042a619ef0a39c3d7d55fe81bdb4df09a52c9cdde0d07bf1aa7d"},
@@ -549,11 +549,10 @@ files = [
 ]
 
 [extras]
-all = ["kafka-python", "redis"]
 kafka = ["kafka-python"]
 redis = ["redis"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.9"
-content-hash = "1129b0be4e0ffcddeb116a1f9bb288f8749d91d43dfdb299d98504791ff17d10"
+python-versions = ">=3.9"
+content-hash = "3deda7da7addca51c947517d6a3431fb83af3d5dea9bfd22943868fcf8d71682"
