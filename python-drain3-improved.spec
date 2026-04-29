@@ -37,7 +37,7 @@ Provides: drain3-improved
 %pyproject_save_files 'drain3'
 
 %check
-%pyproject_check_import
+%pyproject_check_import -e drain3.valkey_persistence -e drain3.redis_persistence -e drain3.kafka_persistence
 
 
 %files -n python3-drain3-improved -f %{pyproject_files}
