@@ -66,7 +66,7 @@ class TemplateMiner:
                 f"Invalid matched_pattern: {target_obj}, must be either 'Drain' or 'JaccardDrain'"
             )
 
-        if target_obj == "Jaccarddrain":
+        if target_obj == "JaccardDrain":
             self.drain = JaccardDrain(
                 sim_th=self.config.drain_sim_th,
                 depth=self.config.drain_depth,
