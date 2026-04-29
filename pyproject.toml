@@ -30,7 +30,7 @@ dependencies = [
 
 [project.optional-dependencies]
 kafka = [
-    "kafka-python>=2.3.0"
+    "kafka-python>=2.2.15"
 ]
 redis = [
     "redis>=5.2.1"
