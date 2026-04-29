@@ -522,4 +522,4 @@ valkey = ["valkey"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "6a7ee4b110b44f856fa717f4f39f0c6681b3cb1a4efd9b7b47ff7d36442b91c0"
+content-hash = "fa6c39d47f7b727d226c621c1ecf7524cef106994a69357070de6f9879eda04d"
