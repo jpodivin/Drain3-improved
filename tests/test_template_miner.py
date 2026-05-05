@@ -12,6 +12,117 @@ from drain3.memory_buffer_persistence import MemoryBufferPersistence
 from drain3.template_miner_config import TemplateMinerConfig
 
 
+class TemplateMinerConfigValidationTest(unittest.TestCase):
+    def test_invalid_engine_raises(self):
+        config = TemplateMinerConfig()
+        config.engine = "InvalidEngine"
+        with self.assertRaises(ValueError):
+            TemplateMiner(None, config)
+
+    def test_jaccard_drain_engine(self):
+        config = TemplateMinerConfig()
+        config.engine = "JaccardDrain"
+        tm = TemplateMiner(None, config)
+        from drain3.jaccard_drain import JaccardDrain
+
+        self.assertIsInstance(tm.drain, JaccardDrain)
+
+    def test_default_engine_is_drain(self):
+        config = TemplateMinerConfig()
+        tm = TemplateMiner(None, config)
+        from drain3.drain import Drain
+
+        self.assertIsInstance(tm.drain, Drain)
+
+
+class TemplateMinerSnapshotReasonTest(unittest.TestCase):
+    def test_cluster_created_returns_reason(self):
+        config = TemplateMinerConfig()
+        tm = TemplateMiner(None, config)
+        reason = tm.get_snapshot_reason("cluster_created", 1)
+        self.assertIsNotNone(reason)
+        self.assertIn("cluster_created", reason)
+
+    def test_cluster_template_changed_returns_reason(self):
+        config = TemplateMinerConfig()
+        tm = TemplateMiner(None, config)
+        reason = tm.get_snapshot_reason("cluster_template_changed", 5)
+        self.assertIsNotNone(reason)
+        self.assertIn("5", reason)
+
+    def test_none_change_within_interval_returns_none(self):
+        config = TemplateMinerConfig()
+        tm = TemplateMiner(None, config)
+        reason = tm.get_snapshot_reason("none", 1)
+        self.assertIsNone(reason)
+
+    def test_none_change_past_interval_returns_periodic(self):
+        config = TemplateMinerConfig()
+        config.snapshot_interval_minutes = 0
+        tm = TemplateMiner(None, config)
+        tm.last_save_time = 0
+        reason = tm.get_snapshot_reason("none", 1)
+        self.assertEqual("periodic", reason)
+
+
+class TemplateMinerGetParameterListTest(unittest.TestCase):
+    def test_get_parameter_list(self):
+        config = TemplateMinerConfig()
+        tm = TemplateMiner(None, config)
+        tm.add_log_message("hello world")
+        tm.add_log_message("hello earth")
+        params = tm.get_parameter_list("hello <*>", "hello earth")
+        self.assertEqual(["earth"], params)
+
+    def test_get_parameter_list_no_match(self):
+        config = TemplateMinerConfig()
+        tm = TemplateMiner(None, config)
+        params = tm.get_parameter_list("hello <*>", "completely different")
+        self.assertEqual([], params)
+
+
+class TemplateMinerPersistenceTest(unittest.TestCase):
+    def test_save_load_uncompressed(self):
+        persistence = MemoryBufferPersistence()
+        config = TemplateMinerConfig()
+        config.snapshot_compress_state = False
+        tm1 = TemplateMiner(persistence, config)
+        tm1.add_log_message("hello world")
+        tm1.add_log_message("hello earth")
+        tm1.save_state("test")
+
+        tm2 = TemplateMiner(persistence, config)
+        self.assertEqual(
+            len(list(tm1.drain.clusters)),
+            len(list(tm2.drain.clusters)),
+        )
+
+    def test_add_log_message_triggers_save(self):
+        persistence = MemoryBufferPersistence()
+        config = TemplateMinerConfig()
+        tm = TemplateMiner(persistence, config)
+        tm.add_log_message("first message")
+        self.assertIsNotNone(persistence.load_state())
+
+
+class TemplateMinerProfilingTest(unittest.TestCase):
+    def test_profiling_enabled(self):
+        config = TemplateMinerConfig()
+        config.profiling_enabled = True
+        tm = TemplateMiner(None, config)
+        from drain3.simple_profiler import SimpleProfiler
+
+        self.assertIsInstance(tm.profiler, SimpleProfiler)
+
+    def test_profiling_disabled(self):
+        config = TemplateMinerConfig()
+        config.profiling_enabled = False
+        tm = TemplateMiner(None, config)
+        from drain3.simple_profiler import NullProfiler
+
+        self.assertIsInstance(tm.profiler, NullProfiler)
+
+
 class TemplateMinerTest(unittest.TestCase):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
 

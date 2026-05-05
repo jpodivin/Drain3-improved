@@ -6,6 +6,115 @@ from drain3.drain import LogCluster
 from drain3.jaccard_drain import JaccardDrain
 
 
+class JaccardDrainSeqDistanceTest(unittest.TestCase):
+    def test_identical_sequences(self):
+        model = JaccardDrain()
+        sim, params = model.get_seq_distance(["a", "b"], ["a", "b"], False)
+        self.assertAlmostEqual(1.0, sim)
+        self.assertEqual(0, params)
+
+    def test_empty_sequences(self):
+        model = JaccardDrain()
+        sim, params = model.get_seq_distance([], [], False)
+        self.assertAlmostEqual(1.0, sim)
+        self.assertEqual(0, params)
+
+    def test_no_overlap(self):
+        model = JaccardDrain()
+        sim, params = model.get_seq_distance(["a", "b"], ["c", "d"], False)
+        self.assertAlmostEqual(0.0, sim)
+        self.assertEqual(0, params)
+
+    def test_with_param_str_include(self):
+        model = JaccardDrain()
+        sim, params = model.get_seq_distance(
+            ["a", "<*>"], ["a", "x"], include_params=True
+        )
+        self.assertEqual(1, params)
+        self.assertGreater(sim, 0)
+
+    def test_with_param_str_exclude(self):
+        model = JaccardDrain()
+        sim, params = model.get_seq_distance(
+            ["a", "<*>"], ["a", "x"], include_params=False
+        )
+        self.assertEqual(1, params)
+
+    def test_gain_caps_at_one(self):
+        model = JaccardDrain()
+        sim, _ = model.get_seq_distance(["a"], ["a"], False)
+        self.assertLessEqual(sim, 1.0)
+
+
+class JaccardDrainCreateTemplateTest(unittest.TestCase):
+    def test_same_length_different_tokens(self):
+        model = JaccardDrain(param_str="*")
+        result = model.create_template(["a", "b", "c"], ["a", "x", "c"])
+        self.assertListEqual(["a", "*", "c"], result)
+
+    def test_same_length_identical(self):
+        model = JaccardDrain(param_str="*")
+        result = model.create_template(["a", "b"], ["a", "b"])
+        self.assertListEqual(["a", "b"], result)
+
+    def test_different_length_seq1_longer(self):
+        model = JaccardDrain(param_str="*")
+        result = model.create_template(["a", "b", "c", "d"], ["a", "c"])
+        self.assertIn("a", result)
+        self.assertIn("c", result)
+        self.assertEqual(4, len(result))
+
+    def test_different_length_seq2_longer(self):
+        model = JaccardDrain(param_str="*")
+        result = model.create_template(["a"], ["a", "b", "c"])
+        self.assertEqual(3, len(result))
+
+
+class JaccardDrainMatchTest(unittest.TestCase):
+    def test_match_never(self):
+        model = JaccardDrain()
+        model.add_log_message("hello world test")
+        result = model.match("hello world test", full_search_strategy="never")
+        self.assertIsNotNone(result)
+
+    def test_match_always(self):
+        model = JaccardDrain()
+        model.add_log_message("hello world test")
+        result = model.match("hello world test", full_search_strategy="always")
+        self.assertIsNotNone(result)
+
+    def test_match_fallback(self):
+        model = JaccardDrain()
+        model.add_log_message("hello world test")
+        result = model.match("hello world test", full_search_strategy="fallback")
+        self.assertIsNotNone(result)
+
+    def test_match_invalid_strategy_raises(self):
+        model = JaccardDrain()
+        with self.assertRaises(AssertionError):
+            model.match("hello", full_search_strategy="invalid")
+
+    def test_match_no_match(self):
+        model = JaccardDrain()
+        model.add_log_message("aaa bbb ccc")
+        result = model.match("xxx yyy zzz", full_search_strategy="never")
+        self.assertIsNone(result)
+
+
+class JaccardDrainEmptyLogTest(unittest.TestCase):
+    def test_add_empty_message(self):
+        model = JaccardDrain()
+        cluster, change_type = model.add_log_message("")
+        self.assertEqual("cluster_created", change_type)
+        self.assertEqual("", cluster.get_template())
+
+    def test_add_empty_message_twice(self):
+        model = JaccardDrain()
+        model.add_log_message("")
+        cluster, change_type = model.add_log_message("")
+        self.assertEqual("none", change_type)
+
+
 class DrainTest(unittest.TestCase):
     def test_add_shorter_than_depth_message(self):
         model = JaccardDrain(depth=4)
