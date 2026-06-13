@@ -193,14 +193,14 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "jsonpickle"
-version = "4.1.1"
+version = "4.1.2"
 description = "jsonpickle encodes/decodes any Python object to/from JSON"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "jsonpickle-4.1.1-py3-none-any.whl", hash = "sha256:bb141da6057898aa2438ff268362b126826c812a1721e31cf08a6e142910dc91"},
-    {file = "jsonpickle-4.1.1.tar.gz", hash = "sha256:f86e18f13e2b96c1c1eede0b7b90095bbb61d99fedc14813c44dc2f361dbbae1"},
+    {file = "jsonpickle-4.1.2-py3-none-any.whl", hash = "sha256:7ffe34426bc797684dbf1dc84185558bd864cd25b1ff5fb01b7405e392d0a937"},
+    {file = "jsonpickle-4.1.2.tar.gz", hash = "sha256:8afed18aa189fd81e2e833b426bb4af485594921f0b1d36c2001fc5637a2f210"},
 ]
 
 [package.extras]
@@ -565,4 +565,4 @@ valkey = ["valkey"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "1d800436be2fac3e63fc4badb3bb5310b3457ec33f94ed7190ec554ac2347032"
+content-hash = "3581e458124f0d4947f903e4afba3d4f93d058d5d1cf6fcaa0f0abc326f76319"

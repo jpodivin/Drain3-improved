@@ -24,7 +24,7 @@ classifiers=[
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "jsonpickle>=4.0.2",
+    "jsonpickle>=4.1.2",
     "cachetools>=5.5.2",
 ]
 
