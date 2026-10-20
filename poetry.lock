@@ -266,15 +266,15 @@ testing = ["PyYAML", "atheris (>=2.3.0,<2.4.0) ; python_version < \"3.12\"", "bs
 
 [[package]]
 name = "kafka-python"
-version = "2.3.1"
+version = "3.0.11"
 description = "Pure Python client for Apache Kafka"
 optional = true
-python-versions = "*"
+python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"kafka\""
 files = [
-    {file = "kafka_python-2.3.1-py2.py3-none-any.whl", hash = "sha256:4908865da9e57f0f966a83788c71cb0ae91c33451a26ab6e6984a00b15c6ed71"},
-    {file = "kafka_python-2.3.1.tar.gz", hash = "sha256:90f1caa12d8faa9fd059852b0c73adf169b979279aa2e3ff370f9fe615d654b6"},
+    {file = "kafka_python-3.0.11-py3-none-any.whl", hash = "sha256:9d10cab4e11e02545d82c7e5af5702da5aa46dd4eccd11ad92a50bf6dbbecd14"},
+    {file = "kafka_python-3.0.11.tar.gz", hash = "sha256:a003d927e79c801d6cfd1e59ceaaf78807351e75cdb5b8ee9ce4262586f9780f"},
 ]
 
 [package.extras]
@@ -282,7 +282,7 @@ benchmarks = ["pyperf"]
 crc32c = ["crc32c"]
 lz4 = ["lz4"]
 snappy = ["python-snappy"]
-testing = ["mock ; python_version < \"3.3\"", "pytest", "pytest-mock", "pytest-timeout"]
+testing = ["pytest", "pytest-mock", "pytest-timeout"]
 zstd = ["zstandard"]
 
 [[package]]
@@ -620,4 +620,4 @@ valkey = ["valkey"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "1d800436be2fac3e63fc4badb3bb5310b3457ec33f94ed7190ec554ac2347032"
+content-hash = "382028710cb043320c9a40a46733b501c781c480697ccce0b3d1cf15ef2893e5"
